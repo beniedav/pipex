@@ -6,7 +6,7 @@
 /*   By: badou <badou@student.42barcelona.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 18:44:49 by badou             #+#    #+#             */
-/*   Updated: 2025/05/25 19:03:03 by badou            ###   ########.fr       */
+/*   Updated: 2025/05/26 17:40:35 by badou            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,22 +58,30 @@ static char	*find_command_path(char **paths, char *cmd)
 
 static void	init_cmds(t_pipex *pipex)
 {
-	pipex->cmds1[0] = find_command_path(pipex->cmd_paths, pipex->cmds1[0]);
-	if (!pipex->cmds1[0])
+	char*	path;
+
+	path = find_command_path(pipex->cmd_paths, pipex->cmds1[0]);
+	if (!path)
 	{
+		perror(pipex->cmds1[0]);
 		free_arr(pipex->cmd_paths);
 		free_arr(pipex->cmds1);
 		free_arr(pipex->cmds2);
-		error_and_exit("Command not found");
+		exit(1);
 	}
-	pipex->cmds2[0] = find_command_path(pipex->cmd_paths, pipex->cmds2[0]);
-	if (!pipex->cmds2[0])
+	free(pipex->cmds1[0]);
+	pipex->cmds1[0] = path;
+	path = find_command_path(pipex->cmd_paths, pipex->cmds2[0]);
+	if (!path)
 	{
+		perror(pipex->cmds1[0]);
 		free_arr(pipex->cmd_paths);
 		free_arr(pipex->cmds1);
 		free_arr(pipex->cmds2);
-		error_and_exit("Command not found");
+		exit(1);
 	}
+	free(pipex->cmds2[0]);
+	pipex->cmds2[0] = path;
 	return ;
 }
 
@@ -86,7 +94,7 @@ static void	init_input(t_pipex *pipex, char **av, char **envp)
 	pipex->outfile = av[4];
 	pipex->outfile_fd = open(av[4], O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (pipex->outfile_fd < 0)
-		error_and_exit(NULL);
+		error_and_exit("outfile");
 	pipex->cmd_paths = get_path_var(envp);
 	if (!pipex->cmd_paths)
 		error_and_exit(NULL);

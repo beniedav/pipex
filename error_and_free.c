@@ -6,7 +6,7 @@
 /*   By: badou <badou@student.42barcelona.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 19:01:25 by badou             #+#    #+#             */
-/*   Updated: 2025/05/25 19:01:41 by badou            ###   ########.fr       */
+/*   Updated: 2025/05/26 17:39:34 by badou            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,7 @@
 
 void	error_and_exit(char *string)
 {
-	ft_printf("Error\n");
-	if (string)
-		ft_printf("%s\n", string);
-	else
-		ft_printf("%s\n", strerror(errno));
+	perror(string);
 	exit(1);
 }
 
@@ -35,4 +31,13 @@ void	free_arr(char **arr)
 		i++;
 	}
 	free(arr);
+}
+
+void	cleanup(t_pipex* pipex)
+{
+	free_arr(pipex->cmd_paths);
+	free_arr(pipex->cmds1);
+	free_arr(pipex->cmds2);
+	close(pipex->outfile_fd);
+	close(pipex->infile_fd);
 }

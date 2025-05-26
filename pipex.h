@@ -6,7 +6,7 @@
 /*   By: badou <badou@student.42barcelona.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:11:50 by badou             #+#    #+#             */
-/*   Updated: 2025/05/25 19:02:29 by badou            ###   ########.fr       */
+/*   Updated: 2025/05/26 16:49:23 by badou            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,14 @@ typedef struct s_pipex
 // init struct
 void	init_struct(t_pipex *pipex, char **av, char **envp);
 
+//processes
+void	exec_processes(t_pipex *pipex, char** envp);
+
+
 //error and free
 void	error_and_exit(char *string);
 void	free_arr(char **arr);
+void	cleanup(t_pipex* pipex);
+
 
 #endif
