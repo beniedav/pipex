@@ -12,10 +12,10 @@
 
 #include "pipex.h"
 
-void	error_and_exit(char *string)
+void	error_and_exit(char *string, int exit_code)
 {
 	perror(string);
-	exit(1);
+	exit(exit_code);
 }
 
 void	free_arr(char **arr)

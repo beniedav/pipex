@@ -17,7 +17,7 @@ int	main(int ac, char **av, char **envp)
 	t_pipex	pipex;
 
 	if (ac != 5)
-		error_and_exit("Expected 4 arguments");
+		error_and_exit("Expected 4 arguments", 1);
 	init_struct(&pipex, av, envp);
 	ft_printf("Struct initialized successfully\n");
 	exec_processes(&pipex, envp);
