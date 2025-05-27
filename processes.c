@@ -16,27 +16,28 @@ static void	call_child_1(t_pipex *pipex, char **envp)
 {
 	pipex->pid1 = fork();
 	if (pipex->pid1 < 0)
-		error_and_exit("fork", 1); // cleanup
-	if (pipex->pid1 == 0)       // CHILD 1
+		error_and_exit("fork", 1);
+	if (pipex->pid1 == 0)
 	{
-		// Redirect stdin from infile
 		if (dup2(pipex->infile_fd, STDIN_FILENO) == -1)
-			error_and_exit("dup2 failed for stdin", 1);
-		// Redirect stdout to pipe write end
+			error_and_exit(pipex->infile, 1);
 		if (dup2(pipex->pipefd[1], STDOUT_FILENO) == -1)
-			error_and_exit("dup2", 1);
-		// if (close unused fds
-		if (close(pipex->pipefd[0]) == -1) // don’t read from pipe
-			perror(NULL);
-		if (close(pipex->pipefd[1]) == -1) // already duped
-			perror(NULL);
+			error_and_exit("pipe", 1);
+		if (close(pipex->pipefd[0]) == -1)
+			error_and_exit("pipe", 1);
+		if (close(pipex->pipefd[1]) == -1)
+			error_and_exit("pipe", 1);
 		if (close(pipex->infile_fd) == -1)
-			perror(NULL);
+			error_and_exit(pipex->infile, 1);
 		if (close(pipex->outfile_fd) == -1)
-			perror(NULL);
-		// execve
+			error_and_exit(pipex->outfile, 1);
 		execve(pipex->cmds1[0], pipex->cmds1, envp);
-		error_and_exit("Command1 execve failed", 1);
+		write(2, pipex->cmds2[0], ft_strlen(pipex->cmds2[0]));
+		perror(NULL);
+		free_arr(pipex->cmd_paths);
+		free_arr(pipex->cmds1);
+		free_arr(pipex->cmds2);	
+		exit(1);
 	}
 	return ;
 }
@@ -46,26 +47,27 @@ static void	call_child_2(t_pipex *pipex, char **envp)
 	pipex->pid2 = fork();
 	if (pipex->pid2 < 0)
 		error_and_exit("fork", 1);
-	if (pipex->pid2 == 0) // CHILD 2
+	if (pipex->pid2 == 0) 
 	{
-		// Redirect stdin from pipe read end
 		if (dup2(pipex->pipefd[0], STDIN_FILENO) == -1)
-			error_and_exit("dup2 fail", 1);
-		// Redirect stdout to oufile
+			error_and_exit("pipe", 1);
 		if (dup2(pipex->outfile_fd, STDOUT_FILENO) == -1)
-			error_and_exit("dup2 fail", 1);
-		// if (close unused fds
-		if (close(pipex->pipefd[1]) == -1) // don’t read from pipe
-			perror("Close");
-		if (close(pipex->pipefd[0]) == -1) // already duped
-			perror("Close");
+			error_and_exit(pipex->outfile, 1);
+		if (close(pipex->pipefd[1]) == -1)
+			error_and_exit("pipe", 1);
+		if (close(pipex->pipefd[0]) == -1)
+			error_and_exit("pipe", 1);
 		if (close(pipex->infile_fd) == -1)
-			perror("Close");
+			error_and_exit(pipex->infile, 1);
 		if (close(pipex->outfile_fd) == -1)
-			perror("Close");
-		// execve
+			error_and_exit(pipex->outfile, 1);
 		execve(pipex->cmds2[0], pipex->cmds2, envp);
-		error_and_exit("Command2 execve failed", 1);
+		write(2, pipex->cmds2[0], ft_strlen(pipex->cmds2[0]));
+		perror(NULL);
+		free_arr(pipex->cmd_paths);
+		free_arr(pipex->cmds1);
+		free_arr(pipex->cmds2);
+		exit(1);
 	}
 	return ;
 }
@@ -73,7 +75,10 @@ static void	call_child_2(t_pipex *pipex, char **envp)
 void	exec_processes(t_pipex *pipex, char **envp)
 {
 	if (pipe(pipex->pipefd) == -1)
-		error_and_exit("Pipe", 1); // free arrays of the struct first.
+	{
+		cleanup(pipex);
+		error_and_exit("pipe", 1);
+	}
 	call_child_1(pipex, envp);
 	call_child_2(pipex, envp);
 	close(pipex->pipefd[0]);

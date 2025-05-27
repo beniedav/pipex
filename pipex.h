@@ -45,7 +45,9 @@ void	exec_processes(t_pipex *pipex, char** envp);
 
 //error and free
 void	error_and_exit(char *string, int exit);
+void	custom_exit(char* string, int exit_code);
 void	free_arr(char **arr);
+void	close_fds(t_pipex* pipex);
 void	cleanup(t_pipex* pipex);
 
 

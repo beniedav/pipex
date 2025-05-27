@@ -31,9 +31,8 @@ static char	**get_path_var(char **envp)
 		i++;
 	}
 	if (!unsplit_path)
-		error_and_exit("PATH not found in envp", 1);//PATH not found
+		return (NULL);
 	split_path = ft_split(unsplit_path, ':');
-		error_and_exit(NULL, 1);//Split error
 	return (split_path);
 }
 
@@ -47,7 +46,11 @@ static char	*find_command_path(char **paths, char *cmd)
 	while (paths[i])
 	{
 		tmp = ft_strjoin(paths[i], "/");
-		full_path = ft_strjoin(tmp, cmd);//could protect this as well
+		if (!tmp)
+			return (NULL);
+		full_path = ft_strjoin(tmp, cmd);
+		if (!full_path)
+			return (NULL);
 		free(tmp);
 		if (access(full_path, X_OK) == 0)
 			return (full_path);
@@ -57,7 +60,7 @@ static char	*find_command_path(char **paths, char *cmd)
 	return (NULL);
 }
 
-static void	init_cmds(t_pipex *pipex)//This is perfect
+static void	init_cmds(t_pipex *pipex)
 {
 	char*	path;
 
@@ -66,9 +69,7 @@ static void	init_cmds(t_pipex *pipex)//This is perfect
 	{
 		write (2, pipex->cmds1[0], ft_strlen(pipex->cmds1[0]));
 		write (2, ": command not found\n", 21);
-		free_arr(pipex->cmd_paths);
-		free_arr(pipex->cmds1);
-		free_arr(pipex->cmds2);
+		cleanup(pipex);
 		exit(0);
 	}
 	free(pipex->cmds1[0]);
@@ -78,9 +79,7 @@ static void	init_cmds(t_pipex *pipex)//This is perfect
 	{
 		write (2, pipex->cmds2[0], ft_strlen(pipex->cmds2[0]));
 		write (2, ": command not found\n", 21);
-		free_arr(pipex->cmd_paths);
-		free_arr(pipex->cmds1);
-		free_arr(pipex->cmds2);
+		cleanup(pipex);
 		exit(127);
 	}
 	free(pipex->cmds2[0]);
@@ -93,18 +92,35 @@ static void	init_input(t_pipex *pipex, char **av, char **envp)
 	pipex->infile = av[1];
 	pipex->infile_fd = open(av[1], O_RDONLY);
 	if (pipex->infile_fd < 0)
-		error_and_exit(NULL, 1);
+		error_and_exit(pipex->infile, 1);
 	pipex->outfile = av[4];
 	pipex->outfile_fd = open(av[4], O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (pipex->outfile_fd < 0)
-		error_and_exit("outfile", 1);//OK but free stuff
-	pipex->cmd_paths = get_path_var(envp);//fails handled in the function
+	{
+		close(pipex->infile_fd);
+		error_and_exit(pipex->outfile, 1);
+	}
 	pipex->cmds1 = ft_split(av[2], ' ');
 	if (!pipex->cmds1)
-		error_and_exit(NULL, 1);//Split error. custom error
+	{
+		close_fds(pipex);
+		custom_exit("ft_split: malloc failed", 1);
+	}
 	pipex->cmds2 = ft_split(av[3], ' ');
 	if (!pipex->cmds2)
-		error_and_exit(NULL, 1);//Split error. custom error
+	{
+		free_arr(pipex->cmds1);
+		close_fds(pipex);
+		custom_exit("ft_split: malloc failed", 1);
+	}
+	pipex->cmd_paths = get_path_var(envp);
+	if (!pipex->cmd_paths)
+	{
+		write (2, pipex->cmds1[0], ft_strlen(pipex->cmds1[0]));
+		write(2, ": command not found\n", 21);
+		cleanup(pipex);
+		exit(0);
+	}
 	return ;
 }
 

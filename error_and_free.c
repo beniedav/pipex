@@ -18,6 +18,12 @@ void	error_and_exit(char *string, int exit_code)
 	exit(exit_code);
 }
 
+void	custom_exit(char* string, int exit_code)
+{
+	write (2, string, ft_strlen(string));
+	exit(exit_code);
+}
+
 void	free_arr(char **arr)
 {
 	int	i;
@@ -31,6 +37,12 @@ void	free_arr(char **arr)
 		i++;
 	}
 	free(arr);
+}
+
+void	close_fds(t_pipex* pipex)
+{
+	close(pipex->infile_fd);
+	close(pipex->outfile_fd);
 }
 
 void	cleanup(t_pipex* pipex)
