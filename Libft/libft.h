@@ -6,7 +6,7 @@
 /*   By: badou <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/22 17:12:26 by badou             #+#    #+#             */
-/*   Updated: 2025/05/06 15:52:40 by badou            ###   ########.fr       */
+/*   Updated: 2025/05/30 19:56:32 by badou            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef LIBFT_H
@@ -50,6 +50,7 @@ char				*ft_strtrim(char const *s1, char const *set);
 char				*ft_substr(char const *s, unsigned int strt, size_t len);
 int					ft_tolower(int c);
 int					ft_toupper(int c);
+int					ft_isspace(char c);
 
 typedef struct s_list
 {

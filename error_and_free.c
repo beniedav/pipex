@@ -6,7 +6,7 @@
 /*   By: badou <badou@student.42barcelona.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 19:01:25 by badou             #+#    #+#             */
-/*   Updated: 2025/05/27 18:03:57 by badou            ###   ########.fr       */
+/*   Updated: 2025/05/30 19:57:26 by badou            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,12 +43,6 @@ void	safe_close(int fd)
 {
 	if (fd >= 0)
 		close(fd);
-}
-	
-void	close_fds(t_pipex *pipex)
-{
-	close(pipex->infile_fd);
-	close(pipex->outfile_fd);
 }
 
 void	cleanup(t_pipex *pipex)

@@ -6,7 +6,7 @@
 /*   By: badou <badou@student.42barcelona.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:11:50 by badou             #+#    #+#             */
-/*   Updated: 2025/05/27 18:24:04 by badou            ###   ########.fr       */
+/*   Updated: 2025/05/30 20:03:29 by badou            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,12 @@ typedef struct s_pipex
 	int		pipefd[2];
 	pid_t	pid1;
 	pid_t	pid2;
-	int	permission_denied;
+	int		permission_denied;
 }			t_pipex;
+
+// path_utils
+char		**get_path_var(char **envp);
+char		*find_command_path(char **paths, char *cmd);
 
 // init	struct helper
 void		init_input_fds(t_pipex *pipex, char **av);

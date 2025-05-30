@@ -6,33 +6,28 @@
 /*   By: badou <badou@student.42barcelona.com>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/25 16:14:51 by badou             #+#    #+#             */
-/*   Updated: 2025/05/28 18:19:35 by badou            ###   ########.fr       */
+/*   Updated: 2025/05/30 19:57:08 by badou            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void pipex_init(t_pipex *pipex)
+void	pipex_init(t_pipex *pipex)
 {
-    if (!pipex)
-        return;
-
-    pipex->infile = NULL;
-    pipex->outfile = NULL;
-
-    pipex->infile_fd = -1;
-    pipex->outfile_fd = -1;
-
-    pipex->pipefd[0] = -1;
-    pipex->pipefd[1] = -1;
-
-    pipex->pid1 = -1;
-    pipex->pid2 = -1;
-
-    pipex->cmds1 = NULL;
-    pipex->cmds2 = NULL;
-    pipex->cmd_paths = NULL;
-    pipex->permission_denied = 0;
+	if (!pipex)
+		return ;
+	pipex->infile = NULL;
+	pipex->outfile = NULL;
+	pipex->infile_fd = -1;
+	pipex->outfile_fd = -1;
+	pipex->pipefd[0] = -1;
+	pipex->pipefd[1] = -1;
+	pipex->pid1 = -1;
+	pipex->pid2 = -1;
+	pipex->cmds1 = NULL;
+	pipex->cmds2 = NULL;
+	pipex->cmd_paths = NULL;
+	pipex->permission_denied = 0;
 }
 
 int	main(int ac, char **av, char **envp)
