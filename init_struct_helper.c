@@ -65,13 +65,18 @@ void	init_input_fds(t_pipex *pipex, char **av)
 	pipex->infile = av[1];
 	pipex->infile_fd = open(av[1], O_RDONLY);
 	if (pipex->infile_fd < 0)
-		error_and_exit(pipex->infile, 1);
+	{
+		perror(pipex->infile);
+		if (errno == EACCES)
+			pipex->permission_denied = 1;
+	}
 	pipex->outfile = av[4];
 	pipex->outfile_fd = open(av[4], O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (pipex->outfile_fd < 0)
 	{
-		close(pipex->infile_fd);
-		error_and_exit(pipex->outfile, 1);
+		perror(pipex->outfile);
+		if (errno == EACCES)
+			pipex->permission_denied = 1;
 	}
 	return ;
 }
@@ -106,13 +111,13 @@ void	init_cmds(t_pipex *pipex)
 {
 	char	*path;
 
-	path = find_command_path(pipex->cmd_paths, pipex->cmds1[0]);
+	path = find_command_path(pipex->cmd_paths, pipex->cmds1[0]);	
 	if (!path)
 	{
 		write(2, pipex->cmds1[0], ft_strlen(pipex->cmds1[0]));
 		write(2, ": command not found\n", 21);
-		cleanup(pipex);
-		exit(0);
+		//cleanup(pipex);
+		//exit(0);
 	}
 	free(pipex->cmds1[0]);
 	pipex->cmds1[0] = path;
@@ -121,8 +126,8 @@ void	init_cmds(t_pipex *pipex)
 	{
 		write(2, pipex->cmds2[0], ft_strlen(pipex->cmds2[0]));
 		write(2, ": command not found\n", 21);
-		cleanup(pipex);
-		exit(127);
+		//cleanup(pipex);
+		//exit(127);
 	}
 	free(pipex->cmds2[0]);
 	pipex->cmds2[0] = path;

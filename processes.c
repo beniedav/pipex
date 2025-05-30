@@ -14,18 +14,21 @@
 
 static void	call_child_1_helper(t_pipex *pipex)
 {
-	if (dup2(pipex->infile_fd, STDIN_FILENO) == -1)
-		error_and_exit(pipex->infile, 1);
-	if (dup2(pipex->pipefd[1], STDOUT_FILENO) == -1)
-		error_and_exit("pipe", 1);
-	if (close(pipex->pipefd[0]) == -1)
-		error_and_exit("pipe", 1);
-	if (close(pipex->pipefd[1]) == -1)
-		error_and_exit("pipe", 1);
-	if (close(pipex->infile_fd) == -1)
-		error_and_exit(pipex->infile, 1);
-	if (close(pipex->outfile_fd) == -1)
-		error_and_exit(pipex->outfile, 1);
+	int null_fd;
+	
+	if (pipex->infile_fd >= 0)
+		dup2(pipex->infile_fd, STDIN_FILENO);
+	else
+	{
+		null_fd = open ("/dev/null", O_RDONLY);
+		dup2(null_fd, STDIN_FILENO);
+		safe_close(null_fd);
+	}
+	dup2(pipex->pipefd[1], STDOUT_FILENO);
+	safe_close(pipex->pipefd[0]);
+	safe_close(pipex->pipefd[1]);
+	safe_close(pipex->infile_fd);
+	safe_close(pipex->outfile_fd);
 	return ;
 }
 
@@ -38,30 +41,30 @@ static void	call_child_1(t_pipex *pipex, char **envp)
 	{
 		call_child_1_helper(pipex);
 		execve(pipex->cmds1[0], pipex->cmds1, envp);
-		write(2, pipex->cmds2[0], ft_strlen(pipex->cmds2[0]));
-		perror(NULL);
-		free_arr(pipex->cmd_paths);
-		free_arr(pipex->cmds1);
-		free_arr(pipex->cmds2);
-		exit(1);
+		cleanup(pipex);
+		exit(127);
 	}
 	return ;
 }
 
 static void	call_child_2_helper(t_pipex *pipex)
 {
-	if (dup2(pipex->pipefd[0], STDIN_FILENO) == -1)
-		error_and_exit("pipe", 1);
-	if (dup2(pipex->outfile_fd, STDOUT_FILENO) == -1)
-		error_and_exit(pipex->outfile, 1);
-	if (close(pipex->pipefd[1]) == -1)
-		error_and_exit("pipe", 1);
-	if (close(pipex->pipefd[0]) == -1)
-		error_and_exit("pipe", 1);
-	if (close(pipex->infile_fd) == -1)
-		error_and_exit(pipex->infile, 1);
-	if (close(pipex->outfile_fd) == -1)
-		error_and_exit(pipex->outfile, 1);
+        int null_fd;
+
+        if (pipex->outfile_fd >= 0)
+                dup2(pipex->outfile_fd, STDOUT_FILENO);
+        else
+        {
+                null_fd = open ("/dev/null", O_WRONLY);
+                dup2(null_fd, STDOUT_FILENO);
+                safe_close(null_fd);
+        }
+	dup2(pipex->pipefd[0], STDIN_FILENO);
+	dup2(pipex->outfile_fd, STDOUT_FILENO);
+	safe_close(pipex->pipefd[1]);
+	safe_close(pipex->pipefd[0]);
+	safe_close(pipex->infile_fd);
+	safe_close(pipex->outfile_fd);
 	return ;
 }
 
@@ -74,18 +77,17 @@ static void	call_child_2(t_pipex *pipex, char **envp)
 	{
 		call_child_2_helper(pipex);
 		execve(pipex->cmds2[0], pipex->cmds2, envp);
-		write(2, pipex->cmds2[0], ft_strlen(pipex->cmds2[0]));
-		perror(NULL);
-		free_arr(pipex->cmd_paths);
-		free_arr(pipex->cmds1);
-		free_arr(pipex->cmds2);
-		exit(1);
+		cleanup(pipex);
+		exit(127);
 	}
 	return ;
 }
 
 void	exec_processes(t_pipex *pipex, char **envp)
 {
+	int status1;
+	int status2;
+
 	if (pipe(pipex->pipefd) == -1)
 	{
 		cleanup(pipex);
@@ -93,7 +95,16 @@ void	exec_processes(t_pipex *pipex, char **envp)
 	}
 	call_child_1(pipex, envp);
 	call_child_2(pipex, envp);
-	close(pipex->pipefd[0]);
-	close(pipex->pipefd[1]);
+	safe_close(pipex->pipefd[0]);
+	safe_close(pipex->pipefd[1]);
+	waitpid(pipex->pid1, &status1, 0);
+	waitpid(pipex->pid2, &status2, 0);
+        cleanup(pipex);
+        if (pipex->permission_denied == 1)
+                exit(1);
+	if (WIFEXITED(status2))
+		exit(WEXITSTATUS(status2));
+	else
+		exit(1);
 	return ;
 }

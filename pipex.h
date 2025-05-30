@@ -34,6 +34,7 @@ typedef struct s_pipex
 	int		pipefd[2];
 	pid_t	pid1;
 	pid_t	pid2;
+	int	permission_denied;
 }			t_pipex;
 
 // init	struct helper
@@ -53,5 +54,6 @@ void		custom_exit(char *string, int exit_code);
 void		free_arr(char **arr);
 void		close_fds(t_pipex *pipex);
 void		cleanup(t_pipex *pipex);
+void		safe_close(int fd);
 
 #endif

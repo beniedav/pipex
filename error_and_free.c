@@ -39,6 +39,12 @@ void	free_arr(char **arr)
 	free(arr);
 }
 
+void	safe_close(int fd)
+{
+	if (fd >= 0)
+		close(fd);
+}
+	
 void	close_fds(t_pipex *pipex)
 {
 	close(pipex->infile_fd);
@@ -47,9 +53,11 @@ void	close_fds(t_pipex *pipex)
 
 void	cleanup(t_pipex *pipex)
 {
+	safe_close(pipex->infile_fd);
+	safe_close(pipex->outfile_fd);
+	safe_close(pipex->pipefd[0]);
+	safe_close(pipex->pipefd[1]);
 	free_arr(pipex->cmd_paths);
 	free_arr(pipex->cmds1);
 	free_arr(pipex->cmds2);
-	close(pipex->outfile_fd);
-	close(pipex->infile_fd);
 }
